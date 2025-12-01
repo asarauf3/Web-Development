@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Quiz - Futuristic Edition (Single File)</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Global & Base Styles --- */
+        :root {
+            --bg-color: #0d1117;
+            --primary-color: #00ffc4; /* Futuristic neon green */
+            --secondary-color: #8b3cff; /* Futuristic neon purple */
+            --text-color: #ffffff;
+            --correct-color: #38c172;
+            --wrong-color: #e3342f;
+            --card-bg: #161b22;
+            --border-radius: 8px;
+            --transition-time: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* --- Main Container Layout (Flexbox) --- */
+        #quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: 0 0 40px rgba(0, 255, 196, 0.5); /* Main glow effect */
+            border: 1px solid var(--primary-color);
+            min-height: 450px;
+            /* Use Flexbox for centered content within the container */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Screen Transitions --- */
+        .screen {
+            width: 100%;
+            display: none;
+            text-align: center;
+            /* Flex content setup for screens */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* --- Futuristic Button Style --- */
+        .futuristic-btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            background: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            transition: all var(--transition-time) ease;
+            box-shadow: 0 0 10px var(--primary-color);
+            text-transform: uppercase;
+        }
+
+        .futuristic-btn:hover {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            box-shadow: 0 0 20px var(--secondary-color);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .futuristic-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* --- Glitch/Hacker Text Effect --- */
+        .glitch-text {
+            font-size: 2.5em;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color), 0 0 15px var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        /* --- Quiz Screen Styles --- */
+        #quiz-screen {
+            padding: 20px;
+        }
+
+        #quiz-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        #question-text {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: var(--text-color);
+        }
+
+        /* --- Options Layout (Flexbox Grid) --- */
+        .options-grid {
+            width: 100%;
+            display: grid; /* Use Grid for options, highly flexible */
+            gap: 15px;
+            grid-template-columns: repeat(2, 1fr); /* Default to 2 columns for desktop */
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #21262d;
+            border: 1px solid var(--secondary-color);
+            color: var(--text-color);
+            text-align: left;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color var(--transition-time), transform var(--transition-time), box-shadow var(--transition-time);
+            font-size: 1em;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: var(--secondary-color);
+            box-shadow: 0 0 15px var(--secondary-color);
+            transform: scale(1.02);
+        }
+
+        .option-btn:disabled {
+            pointer-events: none; /* Keep disabled buttons from changing cursor */
+        }
+
+        /* --- Feedback States --- */
+        .option-btn.correct {
+            background-color: var(--correct-color);
+            box-shadow: 0 0 15px var(--correct-color);
+            border-color: var(--correct-color);
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            box-shadow: 0 0 15px var(--wrong-color);
+            border-color: var(--wrong-color);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+
+        #feedback-area {
+            width: 100%;
+            margin-top: 20px;
+            min-height: 80px; /* Reserve space */
+        }
+
+        #feedback-message {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: var(--border-radius);
+        }
+
+        .correct-msg { color: var(--correct-color); }
+        .wrong-msg { color: var(--wrong-color); }
+
+        /* --- Result Screen Specifics --- */
+        #final-score {
+            font-size: 2em;
+            color: var(--primary-color);
+            margin: 20px 0;
+            text-shadow: 0 0 5px var(--primary-color);
+        }
+
+        #final-message {
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        /* --- Responsiveness (Mobile First with Media Query) --- */
+        @media (max-width: 600px) {
+            /* For mobile screens, switch options to a single column */
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            #quiz-container {
+                padding: 20px;
+            }
+
+            .glitch-text {
+                font-size: 1.8em;
+            }
+
+            .futuristic-btn {
+                padding: 12px 20px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main id="quiz-container">
+
+        <section id="welcome-screen" class="screen active">
+            <h1 class="glitch-text">Quantum Quiz Initiated</h1>
+            <p>Test your knowledge in a futuristic challenge!</p>
+            <button id="start-quiz-btn" class="futuristic-btn">Start Simulation</button>
+        </section>
+
+        <section id="quiz-screen" class="screen hidden">
+            <div id="quiz-header">
+                <span id="score-display">Score: 0</span>
+                <span id="question-counter">Question 1/5</span>
+            </div>
+            <div id="quiz-body">
+                <h2 id="question-text">Question loading...</h2>
+                <div id="options-container" class="options-grid">
+                    </div>
+            </div>
+            <div id="feedback-area">
+                <p id="feedback-message" class="hidden"></p>
+                <button id="next-question-btn" class="futuristic-btn hidden">Next Question &rarr;</button>
+            </div>
+        </section>
+
+        <section id="result-screen" class="screen hidden">
+            <h1 id="result-title" class="glitch-text">Simulation Complete</h1>
+            <p id="final-score">Your final score is: 0</p>
+            <h2 id="final-message"></h2>
+            <button id="restart-quiz-btn" class="futuristic-btn">Run New Simulation</button>
+        </section>
+
+    </main>
+
+    <script>
+        // --- 1. Quiz Data Storage (Array of Objects) ---
+        const quizQuestions = [
+            {
+                question: "In computer science, what does 'API' stand for?",
+                options: ["Advanced Protocol Interface", "Application Programming Interface", "Automated Process Integration", "Abstract Program Instruction"],
+                answer: "Application Programming Interface",
+                type: "mcq"
+            },
+            {
+                question: "Is JavaScript a statically typed language?",
+                options: ["True", "False"],
+                answer: "False",
+                type: "tf"
+            },
+            {
+                question: "Which CSS Flexbox property controls the alignment of items along the main axis?",
+                options: ["align-items", "justify-content", "flex-direction", "align-content"],
+                answer: "justify-content",
+                type: "mcq"
+            },
+            {
+                question: "All HTML elements can have a 'display: flex' property applied to them.",
+                options: ["True", "False"],
+                answer: "True",
+                type: "tf"
+            },
+            {
+                question: "What is the primary method for adding event listeners to DOM elements?",
+                options: ["element.onClick", "element.listen()", "element.addEventListener()", "element.attachEvent()"],
+                answer: "element.addEventListener()",
+                type: "mcq"
+            }
+        ];
+
+        // --- 2. DOM Elements and State Variables ---
+        const elements = {
+            // Screens
+            welcomeScreen: document.getElementById('welcome-screen'),
+            quizScreen: document.getElementById('quiz-screen'),
+            resultScreen: document.getElementById('result-screen'),
+
+            // Buttons
+            startBtn: document.getElementById('start-quiz-btn'),
+            nextBtn: document.getElementById('next-question-btn'),
+            restartBtn: document.getElementById('restart-quiz-btn'),
+
+            // Quiz Elements
+            scoreDisplay: document.getElementById('score-display'),
+            questionCounter: document.getElementById('question-counter'),
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            feedbackMessage: document.getElementById('feedback-message'),
+
+            // Result Elements
+            finalScore: document.getElementById('final-score'),
+            finalMessage: document.getElementById('final-message'),
+        };
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let quizActive = false; // Prevents answering when feedback is shown
+
+        // --- 3. Core Logic Functions ---
+
+        /**
+         * Hides all screens and shows the specified screen.
+         * @param {HTMLElement} screenToShow - The screen to make active.
+         */
+        function switchScreen(screenToShow) {
+            const allScreens = [elements.welcomeScreen, elements.quizScreen, elements.resultScreen];
+            allScreens.forEach(screen => {
+                screen.classList.remove('active');
+                screen.classList.add('hidden');
+            });
+            screenToShow.classList.remove('hidden');
+            screenToShow.classList.add('active');
+        }
+
+        /**
+         * Loads the current question into the DOM.
+         */
+        function loadQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                showResultScreen();
+                return;
+            }
+
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            
+            // Reset feedback area
+            elements.feedbackMessage.classList.add('hidden');
+            elements.nextBtn.classList.add('hidden');
+            elements.nextBtn.disabled = true;
+
+            // Update headers
+            elements.questionCounter.textContent = `Question ${currentQuestionIndex + 1}/${quizQuestions.length}`;
+            elements.scoreDisplay.textContent = `Score: ${score}`;
+            elements.questionText.textContent = currentQuestion.question;
+            
+            // Clear old options
+            elements.optionsContainer.innerHTML = '';
+            
+            // Create new options (DOM manipulation)
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-btn');
+                button.textContent = option;
+                
+                // Add event listener (using a callback function)
+                button.addEventListener('click', () => handleAnswer(option, currentQuestion.answer, button));
+
+                elements.optionsContainer.appendChild(button);
+            });
+
+            quizActive = true;
+        }
+
+        /**
+         * Callback function to handle the user's answer selection.
+         * @param {string} selectedOption - The text of the option the user clicked.
+         * @param {string} correctAnswer - The correct answer for the current question.
+         * @param {HTMLElement} clickedButton - The DOM button element that was clicked.
+         */
+        function handleAnswer(selectedOption, correctAnswer, clickedButton) {
+            if (!quizActive) return; // Prevent double-clicking
+
+            quizActive = false; // Lock the answers for feedback period
+
+            const isCorrect = selectedOption === correctAnswer;
+            
+            // 1. Immediate Feedback (DOM manipulation)
+            elements.feedbackMessage.classList.remove('hidden');
+            elements.nextBtn.classList.remove('hidden');
+            elements.nextBtn.disabled = false;
+
+            if (isCorrect) {
+                score++;
+                clickedButton.classList.add('correct');
+                elements.feedbackMessage.textContent = "✅ Correct! Excellent work.";
+                elements.feedbackMessage.className = 'correct-msg';
+                elements.scoreDisplay.textContent = `Score: ${score}`;
+            } else {
+                clickedButton.classList.add('wrong');
+                elements.feedbackMessage.textContent = "❌ Wrong! Keep trying.";
+                elements.feedbackMessage.className = 'wrong-msg';
+            }
+
+            // Highlight the correct answer if a mistake was made
+            if (!isCorrect) {
+                Array.from(elements.optionsContainer.children).forEach(btn => {
+                    if (btn.textContent === correctAnswer) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // Disable all options
+            Array.from(elements.optionsContainer.children).forEach(btn => btn.disabled = true);
+
+            // Optional: Auto-advance after a short delay (instead of Next button)
+            // setTimeout(nextQuestion, 1500); 
+        }
+
+        /**
+         * Advances to the next question.
+         */
+        function nextQuestion() {
+            currentQuestionIndex++;
+            loadQuestion();
+        }
+
+        /**
+         * Displays the final result screen.
+         */
+        function showResultScreen() {
+            switchScreen(elements.resultScreen);
+            
+            const finalScoreText = `Your Final Score: ${score} out of ${quizQuestions.length}`;
+            elements.finalScore.textContent = finalScoreText;
+
+            let message = "";
+            const percentage = (score / quizQuestions.length) * 100;
+
+            if (percentage === 100) {
+                message = "✨ Flawless Victory! You are a true master of the cyber-domain.";
+                elements.finalMessage.style.color = 'var(--primary-color)';
+            } else if (percentage >= 60) {
+                message = "👍 Great Job! Core knowledge systems are strong. Minor room for optimization.";
+                elements.finalMessage.style.color = 'var(--correct-color)';
+            } else {
+                message = "🧠 Try Again! System reboot recommended. Review the protocols and restart the simulation.";
+                elements.finalMessage.style.color = 'var(--wrong-color)';
+            }
+
+            elements.finalMessage.textContent = message;
+        }
+
+        // --- 4. Event Listeners Initialization ---
+
+        /**
+         * Initializes the quiz variables and starts the quiz.
+         */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            switchScreen(elements.quizScreen);
+            loadQuestion();
+        }
+
+        // Event Listeners
+        elements.startBtn.addEventListener('click', startQuiz);
+        elements.restartBtn.addEventListener('click', startQuiz);
+        elements.nextBtn.addEventListener('click', nextQuestion);
+
+        // --- 5. Initial Setup ---
+        // Ensure the app starts on the welcome screen when the DOM is fully loaded.
+        document.addEventListener('DOMContentLoaded', () => {
+            switchScreen(elements.welcomeScreen);
+        });
+    </script>
+</body>
+</html>
