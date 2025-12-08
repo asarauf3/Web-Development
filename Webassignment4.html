@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aura Shift Controller</title>
+    <style>
+        :root {
+            --base-font: 'Consolas', monospace;
+            --main-text-color: #f0f0f0;
+            --control-bg: #1c1c1c;
+            --control-border: 4px solid #00ff99;
+            --control-shadow: 0 0 15px rgba(0, 255, 153, 0.7);
+        }
+
+        body {
+            font-family: var(--base-font);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #333333;
+            transition: background-color 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #display-module {
+            color: var(--main-text-color);
+            margin-bottom: 40px;
+            font-size: 3em;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .action-button {
+            padding: 15px 40px;
+            font-size: 24px;
+            text-transform: uppercase;
+            font-weight: bold;
+            cursor: pointer;
+            border: var(--control-border);
+            border-radius: 50px;
+            background-color: var(--control-bg);
+            color: #00ff99;
+            box-shadow: var(--control-shadow);
+            transition: all 0.3s ease-in-out;
+            letter-spacing: 2px;
+        }
+
+        .action-button:hover {
+            color: #1c1c1c;
+            background-color: #00ff99;
+            box-shadow: 0 0 25px #00ff99, 0 0 5px #1c1c1c inset;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <h1 id="display-module">System Aura Control Panel</h1>
+    <button class="action-button" onclick="initiateAuraShift()">Engage Randomizer</button>
+
+    <script>
+        function acquireRandomHexCode() {
+            let colorValue = Math.floor(Math.random() * 16777215).toString(16);
+            return "#" + colorValue.padStart(6, '0');
+        }
+
+        function initiateAuraShift() {
+            const dynamicColor = acquireRandomHexCode();
+            document.body.style.backgroundColor = dynamicColor;
+            document.getElementById('display-module').textContent = `Aura: ${dynamicColor}`;
+        }
+    </script>
+</body>
+</html>
